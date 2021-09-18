@@ -9,18 +9,12 @@ def perform_query_for_whole_table(database_filename, table_name):
     connection = sqlite3.connect(database_filename)
 
     with connection:
-
-        # obtain a cursor from the connection
-        # cursor = ...
+        cursor = connection.cursor()
 
         stmt = f"SELECT * FROM {table_name}"
+        cursor.execute(stmt)
 
-        # execute the command on the cursor
-        # cursor.execute( ...
-
-        # Obtain result
-        # complete the code:
-        result = ()
+        result = cursor.fetchall()
 
     return result
 

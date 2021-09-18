@@ -4,41 +4,58 @@ import sqlite3
 
 
 def get_table_information_from_database(database_filename):
-    # Bring in code from question 1
+    connection = sqlite3.connect(database_filename)
+
     metadata_dictionary = {}
+
+    with connection:
+        cursor = connection.cursor()
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+
+        result = cursor.fetchall()
+
+        table_names = []
+
+        for row in result:
+            if not "sqlite" in row[0]:
+                table_names.append(row[0])
+
+        for table_name in table_names:
+
+            stmt = "PRAGMA table_info('{}')".format(table_name)
+            cursor.execute(stmt)
+
+            columns = cursor.fetchall()
+
+            for column in columns:
+                if table_name in metadata_dictionary:
+                    metadata_dictionary[table_name].append(column[1])
+                else:
+                    metadata_dictionary[table_name] = [column[1]]
+
     return metadata_dictionary
 
 
 def get_best_of_albums(database_filename, column_name_for_ordering):
     metadata_dictionary = get_table_information_from_database(database_filename)
-
     if column_name_for_ordering not in metadata_dictionary["albums"]:
         print("ERROR: could not find column '{}' in the list of columns for table 'albums'!".format(
             column_name_for_ordering))
         return []
 
-    # create new sqlite connection here using the `database_filename` input
-    # connection = ...
+    connection = sqlite3.connect(database_filename)
 
     result = []
 
-    # with the context of `connection`
-    #with connection:
+    with connection:
+        cursor = connection.cursor()
 
-        # obtain a cursor from the connection
-        # cursor = ...
+        stmt = "SELECT * FROM albums WHERE Title LIKE '%Greatest Hits%' OR Title Like '%Best Of%' ORDER BY {}".format(
+            column_name_for_ordering)
+        cursor.execute(stmt)
 
-        # this should be a sql command  that returns all columns
-        # from albums where the title contains "Greatest Hits" OR "Best Of"
-        # the returned query data should be sorted according to the input `column_name_for_ordering`.
-            # hint you can choose to use .format() on the string query to insert `column_name_for_ordering`.
-
-        #stmt = ...
-
-        # execute the command on the cursor
-        # cursor.execute( ...
-
-        # result = cursor.fetchall()
+        result = cursor.fetchall()
 
     return result
 
@@ -52,7 +69,6 @@ def test_case1():
     for database_record in query_result:
         print(database_record)
 
-
 def test_case2():
     database_filename = 'chinook.db'
     column_name_for_ordering = "AlbumId"
@@ -62,7 +78,6 @@ def test_case2():
     for database_record in query_result:
         print(database_record)
 
-
 def test_case3():
     database_filename = 'chinook.db'
     column_name_for_ordering = "Id"
@@ -70,7 +85,6 @@ def test_case3():
 
     for database_record in query_result:
         print(database_record)
-
 
 def test_case4():
     database_filename = 'chinook.db'
