@@ -25,7 +25,7 @@ def test_case1():
     query_result = perform_query_for_whole_table(database_filename, table_name)
 
     assert query_result[0] == (1, 'AC/DC')
-    assert query_result[3] == (4, 'Alanis Morrissette')
+    assert query_result[3] == (4, 'Alanis Morissette')
 
     #for database_record in query_result[0:20]:
     #    print(database_record)
