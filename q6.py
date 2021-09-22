@@ -3,28 +3,37 @@ import sqlite3
 
 def get_playlist(database_filename, which_playlist):
     # create sqlite connection here using the `database_filename` input
-    # connection = ...
+    connection = sqlite3.connect(database_filename)
 
     # obtain a cursor from the connection
-    # cursor = ...
+    cursor = connection.cursor()
 
     # this should be a sql that returns all PlaylistIds and Names,
     # from the playlists table if the Name is equal to `which_playlist`
     #
-    stmt = ""
+    stmt = "SELECT PlaylistId, Name \
+        FROM playlists \
+            WHERE Name == '{}';".format(which_playlist)
 
     # execute the command on the cursor
-    # cursor.execute( ...
+    cursor.execute(stmt)
 
     # Obtain result
-    result = ()
+    result = cursor.fetchall()
+
+    for i in result:
+        print(i)
 
     # Using the result check that at least 1 result is returned
     # if not print an error and return an empty list.
     # add code here
 
+    if len(result) == 0:
+        print("ERROR: Could not find playlist '{}' in database!".format(which_playlist))
+        return []
+
     playlist_id = result[0][0]
-    # print(playlist_id)
+    print(playlist_id)
 
     # sql_stmt is a sql query that returns all track names, album titles, genre names, artist names,and track composers,
     # for tracks that are on the playlist indicated by `which_playlist`. (use `playlist_id` defined above)
@@ -33,16 +42,22 @@ def get_playlist(database_filename, which_playlist):
     #       - especially which column that playlist_track should be joined on.
 
     # hint: the query should make use of the `playlist_id` parameter.
-    sql_stmt = ""
+    sql_stmt = "SELECT TR.Name, AL.Title, GE.Name, AR.Name, TR.Composer\
+        FROM tracks TR\
+            INNER JOIN albums AL ON AL.AlbumId == TR.AlbumId\
+                INNER JOIN genres GE ON TR.GenreId == GE.GenreId\
+                    INNER JOIN artists AR ON AL.ArtistId == AR.ArtistId\
+                        INNER JOIN playlist_track PT ON PT.PlaylistId == {}\
+                            WHERE TR.TrackId == PT.TrackId;".format(playlist_id)
 
     # execute the `sql_stmt` command on the cursor
-    # cursor.execute( ...
+    cursor.execute(sql_stmt)
 
     # Obtain result
-    result = ()
+    result = cursor.fetchall()
 
     # Then close connection
-    # connection. ...
+    connection.close()
 
     return result
 
@@ -72,7 +87,8 @@ def test_case2():
 
     print(f"Playlist '{which_playlist}'")
     assert len(query_result) == 26
-    assert (query_result[3]) == ('Restless and Wild', 'Restless and Wild', 'Rock', 'Accept', 'F. Baltes, R.A. Smith-Diesel, S. Kaufman, U. Dirkscneider & W. Hoffman')
+    assert (query_result[3]) == ('Restless and Wild', 'Restless and Wild', 'Rock',
+                                 'Accept', 'F. Baltes, R.A. Smith-Diesel, S. Kaufman, U. Dirkscneider & W. Hoffman')
     for count, database_record in enumerate(query_result):
         print(f"{count:<2} Track Name: {database_record[0]}")
         print(f"   Album Title: {database_record[1]}")
@@ -96,6 +112,7 @@ def test_case4():
     which_playlist = 'Grunge'
     query_result = get_playlist(database_filename, which_playlist)
     assert len(query_result) == 15
-    assert query_result[6] == ('On A Plain', 'Nevermind', 'Rock', 'Nirvana', 'Kurt Cobain')
+    assert query_result[6] == (
+        'On A Plain', 'Nevermind', 'Rock', 'Nirvana', 'Kurt Cobain')
     for database_record in query_result:
         print(database_record)
