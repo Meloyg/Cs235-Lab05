@@ -22,6 +22,9 @@ def get_table_information_from_database(database_filename):
         # for each row in the returned result dataset
         # add all rows to the table_names list excluding the rows that begin with "sqlite" (ie at row[0])
         # add code here:
+        for i in result:
+            if "sqlite" not in i[0]:
+                table_names.append(i[0])
 
         for table_name in table_names:
             stmt = "PRAGMA table_info('{}')".format(table_name)
@@ -35,8 +38,12 @@ def get_table_information_from_database(database_filename):
             # otherwise create a new key `table_name` in the dictionary with a new list consisting of
             # the element (ie a list with element column[1]).
             for column in columns:
-                # add code here:
-                pass
+                if table_name not in metadata_dictionary:
+                    metadata_dictionary[table_name] = [column[1]]
+                else:
+                    metadata_dictionary[table_name].append(column[1])
+
+    connection.close()
 
     return metadata_dictionary
 
@@ -44,24 +51,29 @@ def get_table_information_from_database(database_filename):
 # Test case for question one
 def test_case1():
     database_filename = 'chinook.db'
-    metadata_dictionary = get_table_information_from_database(database_filename)
+    metadata_dictionary = get_table_information_from_database(
+        database_filename)
 
     tables = []
     for table in sorted(metadata_dictionary.keys()):
         tables.append(table)
 
-    assert tables == ['albums', 'artists', 'customers', 'employees', 'genres', 'invoice_items', 'invoices', 'media_types', 'playlist_track', 'playlists', 'tracks']
+    assert tables == ['albums', 'artists', 'customers', 'employees', 'genres',
+                      'invoice_items', 'invoices', 'media_types', 'playlist_track', 'playlists', 'tracks']
 
     assert metadata_dictionary['albums'] == ['AlbumId', 'Title', 'ArtistId']
     assert metadata_dictionary['artists'] == ['ArtistId', 'Name']
-    assert metadata_dictionary['customers'] == ['CustomerId', 'FirstName', 'LastName', 'Company', 'Address', 'City', 'State', 'Country', 'PostalCode', 'Phone', 'Fax', 'Email', 'SupportRepId']
-    assert metadata_dictionary['employees'] == ['EmployeeId', 'LastName', 'FirstName', 'Title', 'ReportsTo', 'BirthDate', 'HireDate', 'Address', 'City', 'State', 'Country', 'PostalCode', 'Phone', 'Fax', 'Email']
+    assert metadata_dictionary['customers'] == ['CustomerId', 'FirstName', 'LastName', 'Company',
+                                                'Address', 'City', 'State', 'Country', 'PostalCode', 'Phone', 'Fax', 'Email', 'SupportRepId']
+    assert metadata_dictionary['employees'] == ['EmployeeId', 'LastName', 'FirstName', 'Title', 'ReportsTo',
+                                                'BirthDate', 'HireDate', 'Address', 'City', 'State', 'Country', 'PostalCode', 'Phone', 'Fax', 'Email']
     assert metadata_dictionary['genres'] == ['GenreId', 'Name']
-    assert metadata_dictionary['invoice_items'] == ['InvoiceLineId', 'InvoiceId', 'TrackId', 'UnitPrice', 'Quantity']
-    assert metadata_dictionary['invoices'] == ['InvoiceId', 'CustomerId', 'InvoiceDate', 'BillingAddress', 'BillingCity', 'BillingState', 'BillingCountry', 'BillingPostalCode', 'Total']
+    assert metadata_dictionary['invoice_items'] == [
+        'InvoiceLineId', 'InvoiceId', 'TrackId', 'UnitPrice', 'Quantity']
+    assert metadata_dictionary['invoices'] == ['InvoiceId', 'CustomerId', 'InvoiceDate',
+                                               'BillingAddress', 'BillingCity', 'BillingState', 'BillingCountry', 'BillingPostalCode', 'Total']
     assert metadata_dictionary['media_types'] == ['MediaTypeId', 'Name']
     assert metadata_dictionary['playlist_track'] == ['PlaylistId', 'TrackId']
     assert metadata_dictionary['playlists'] == ['PlaylistId', 'Name']
-    assert metadata_dictionary['tracks'] == ['TrackId', 'Name', 'AlbumId', 'MediaTypeId', 'GenreId', 'Composer', 'Milliseconds', 'Bytes', 'UnitPrice']
-
-
+    assert metadata_dictionary['tracks'] == ['TrackId', 'Name', 'AlbumId',
+                                             'MediaTypeId', 'GenreId', 'Composer', 'Milliseconds', 'Bytes', 'UnitPrice']
