@@ -6,10 +6,10 @@ import sqlite3
 def get_all_artists_with_at_least_n_albums(database_filename, n):
 
     # create sqlite connection here using the `database_filename` input
-    # connection = ...
+    connection = sqlite3.connect(database_filename)
 
     # obtain a cursor from the connection
-    # cursor = ...
+    cursor = connection.cursor()
 
     # this should be a sql that returns all artist ids, artist names, and the Number of albums
     # The returned tuples should only include artists with greater than or equal to `n` parameter
@@ -22,16 +22,24 @@ def get_all_artists_with_at_least_n_albums(database_filename, n):
     # - Hint: use `GROUP BY`
     #
     # Hint: use an inner join to match artists to albums to get all necessary return types
-    stmt = ""
+    stmt = "SELECT AR.ArtistId, AR.Name, COUNT(AL.AlbumId) \
+        FROM artists AR, albums AL \
+                WHERE AL.ArtistId == AR.ArtistId\
+                    GROUP BY AR.ArtistId\
+                        HAVING COUNT(AL.AlbumId) >= {}\
+                            ORDER BY COUNT(AL.AlbumId) DESC, AR.Name ASC\
+                            ;".format(n)
 
     # execute the command on the cursor
-    # cursor.execute( ...
+    cursor.execute(stmt)
 
     # Obtain result
-    result = ()
+    result = cursor.fetchall()
+    for i in result:
+        print(i)
 
     # Then close connection
-    # code here
+    connection.close()
 
     return result
 
@@ -40,7 +48,7 @@ def test_case1():
     database_filename = 'chinook.db'
     n = 4
     query_result = get_all_artists_with_at_least_n_albums(database_filename, n)
-    assert len(query_result) ==12
+    assert len(query_result) == 12
     print("(artist id, artist name, number of albums):")
     assert query_result[11] == (21, 'Various Artists', 4)
 
@@ -52,7 +60,7 @@ def test_case2():
     assert len(query_result) == 5
     assert query_result[4] == (150, 'U2', 10)
 
-        
+
 def test_case3():
     database_filename = 'chinook.db'
     n = 2
