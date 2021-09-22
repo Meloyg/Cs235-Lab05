@@ -11,18 +11,19 @@ def perform_query_for_whole_table(database_filename, table_name):
     with connection:
 
         # obtain a cursor from the connection
-        # cursor = ...
+        cursor = connection.cursor()
 
         stmt = f"SELECT * FROM {table_name}"
 
         # execute the command on the cursor
-        # cursor.execute( ...
+        cursor.execute(stmt)
 
         # Obtain result
         # complete the code:
-        result = ()
+        result = cursor.fetchall()
 
     return result
+
 
 def test_case1():
     database_filename = 'chinook.db'
@@ -33,8 +34,9 @@ def test_case1():
     assert query_result[0] == (1, 'AC/DC')
     assert query_result[3] == (4, 'Alanis Morissette')
 
-    #for database_record in query_result[0:20]:
+    # for database_record in query_result[0:20]:
     #    print(database_record)
+
 
 def test_case2():
     database_filename = 'chinook.db'
