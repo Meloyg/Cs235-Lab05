@@ -21,6 +21,7 @@ def perform_query_for_whole_table(database_filename, table_name):
         # Obtain result
         # complete the code:
         result = cursor.fetchall()
+    connection.close()
 
     return result
 

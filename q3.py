@@ -80,6 +80,7 @@ def get_best_of_albums(database_filename, column_name_for_ordering):
         cursor.execute(stmt)
 
         result = cursor.fetchall()
+    connection.close()
 
     return result
 
